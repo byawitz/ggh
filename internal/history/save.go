@@ -11,7 +11,7 @@ import (
 )
 
 func AddHistoryFromArgs(args []string) {
-	if len(args) == 1 {
+	if len(args) == 1 && !strings.Contains(args[0], "@") {
 		localConfig, err := config.GetConfig(args[0])
 		if err != nil || localConfig.Name == "" {
 			fmt.Printf("couldn't fetch %s from config file, error:%v.\n", args[0], err)
