@@ -47,6 +47,6 @@ ggh --history
 
 ### GGH is NOT replacing SSH
 
-In fact GGH won't work if SSH is not installed, or it ain't available in the path of your system.
+In fact, GGH won't work if SSH is not installed or isn't available in your system's path.
 
-GGH meant to act as a light fast wrapper around your SSH commands.
+GGH is meant to act as a lightweight, fast wrapper around your SSH commands.
