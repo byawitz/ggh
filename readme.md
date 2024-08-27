@@ -1,9 +1,12 @@
 <p align="center">
-    <img width="80" height="70" src="./assets/ggh.png" alt="Elk logo">
+    <img width="80" height="70" src="./assets/ggh.png" alt="GGH logo">
 </p>
 <h1 align="center"/>GGH</h1>
 
 <p align="center"><i>Recall your SSH sessions</i></p>
+
+<p align="center"><img width="750" height="320" src="./assets/ggh.gif" alt="GGH Demo"></p>
+
 
 ## Install
 
@@ -32,3 +35,9 @@ ggh -
 ggh - stage
 ggh - meta-servers
 ```
+
+### GGH is NOT replacing SSH
+
+In fact GGH won't work without SSH installed and available in the path of your system.
+
+GGH meant to be use a light fast wrapper around your SSH commands.
