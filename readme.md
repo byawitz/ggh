@@ -14,7 +14,7 @@ Run one of the following script, or download the binary from the [latest release
 
 ```shell
 #  Unix based (you know)
-curl https://raw.githubusercontent.com/byawitz/ggh/master/install/unix.sh | sudo sh
+curl https://raw.githubusercontent.com/byawitz/ggh/master/install/unix.sh | sh
 
 #  Windows 
 powershell -c "irm https://raw.githubusercontent.com/byawitz/ggh/master/install/windows.ps1 | iex"
