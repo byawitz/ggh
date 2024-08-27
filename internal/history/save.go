@@ -32,9 +32,13 @@ func AddHistoryFromArgs(args []string) {
 		}
 
 		switch {
-		case arg == "-p":
-			generatedConfig.Port = args[i+1]
-			skipNext = true
+		case strings.HasPrefix(arg, "-p"):
+			if arg == "-p" {
+				generatedConfig.Port = args[i+1]
+				skipNext = true
+			} else {
+				generatedConfig.Port = args[i][2:]
+			}
 		case arg == "-i":
 			generatedConfig.Key = args[i+1]
 			skipNext = true
@@ -44,7 +48,6 @@ func AddHistoryFromArgs(args []string) {
 			generatedConfig.Host = values[1]
 		}
 	}
-
 	AddHistory(generatedConfig)
 }
 
