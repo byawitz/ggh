@@ -10,13 +10,13 @@
 
 ## Install
 
-Run one of the following script, or download the binary from the [latest release](https://github.com/byawitz/ggh/releases) page.
+Run one of the following script, or download the latest binary from the [releases](https://github.com/byawitz/ggh/releases) page.
 
 ```shell
-#  Unix based (you know)
+# Unix based
 curl https://raw.githubusercontent.com/byawitz/ggh/master/install/unix.sh | sh
 
-#  Windows 
+# Windows 
 powershell -c "irm https://raw.githubusercontent.com/byawitz/ggh/master/install/windows.ps1 | iex"
 
 # Go
@@ -39,10 +39,14 @@ ggh -
 # Run it with - STRING to get interactive filtered list of your ~/.ssh/config listing
 ggh - stage
 ggh - meta-servers
+
+# To get non-interactive list of history and config, run
+ggh --config
+ggh --history
 ```
 
 ### GGH is NOT replacing SSH
 
-In fact GGH won't work without SSH installed and available in the path of your system.
+In fact GGH won't work if SSH is not installed, or it ain't available in the path of your system.
 
-GGH meant to be use a light fast wrapper around your SSH commands.
+GGH meant to act as a light fast wrapper around your SSH commands.
