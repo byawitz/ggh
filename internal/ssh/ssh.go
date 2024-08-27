@@ -5,6 +5,7 @@ import (
 	"github.com/byawitz/ggh/internal/config"
 	"os"
 	"os/exec"
+	"slices"
 	"strings"
 )
 
@@ -27,6 +28,8 @@ func GenerateCommandArgs(c config.SSHConfig) []string {
 }
 
 func Run(args []string) {
+	args = slices.DeleteFunc(args, func(s string) bool { return s == "" })
+
 	cmd := exec.Command("ssh", args...)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
