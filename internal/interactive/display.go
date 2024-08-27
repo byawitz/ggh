@@ -8,7 +8,7 @@ import (
 	"os"
 )
 
-func InteractiveConfig(value string) []string {
+func Config(value string) []string {
 	list, err := config.ParseWithSearch(value, config.GetConfigFile())
 	if err != nil || len(list) == 0 {
 		fmt.Println("No config found.")

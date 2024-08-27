@@ -19,9 +19,9 @@ func Main() {
 	case command.InteractiveHistory:
 		args = history.Interactive()
 	case command.InteractiveConfig:
-		args = interactive.InteractiveConfig("")
+		args = interactive.Config("")
 	case command.InteractiveConfigWithSearch:
-		args = interactive.InteractiveConfig(value)
+		args = interactive.Config(value)
 	case command.ListHistory:
 		history.Print()
 		return
@@ -31,7 +31,6 @@ func Main() {
 	default:
 
 	}
-
 	history.AddHistoryFromArgs(args)
 	ssh.Run(args)
 }
