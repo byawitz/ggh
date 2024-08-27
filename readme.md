@@ -13,6 +13,11 @@
 Run one of the following script, or download the binary from the [latest release](https://github.com/byawitz/ggh/releases) page.
 
 ```shell
+#  Unix based (you know)
+curl https://raw.githubusercontent.com/byawitz/ggh/master/install/unix.sh | sudo sh
+
+#  Windows 
+powershell -c "irm https://raw.githubusercontent.com/byawitz/ggh/master/install/windows.ps1 | iex"
 
 # Go
 go install github.com/byawitz/ggh@latest
