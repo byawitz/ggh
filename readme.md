@@ -5,7 +5,7 @@
 
 <p align="center"><i>Recall your SSH sessions</i></p>
 
-<p align="center"><img width="750" height="320" src="./assets/ggh.gif" alt="GGH Demo"></p>
+<p align="center"><img src="./assets/ggh.gif" alt="GGH Demo"></p>
 
 
 ## Install
