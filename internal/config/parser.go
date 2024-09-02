@@ -2,10 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"strings"
+
+	"path/filepath"
+
 	"github.com/byawitz/ggh/internal/theme"
 	"github.com/charmbracelet/bubbles/table"
-	"log"
-	"strings"
 )
 
 type SSHConfig struct {
@@ -24,7 +28,7 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 	configsStrings := strings.Split(strings.ReplaceAll(configFile, "\r\n", "\n"), "Host ")
 	var configs = make([]SSHConfig, 0)
 
-	for _, config := range configsStrings[1:] {
+	for _, config := range configsStrings {
 		lines := strings.Split(config, "\n")
 
 		if strings.Trim(lines[0], " ") == "" {
@@ -37,28 +41,83 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 
 		sshConfig := SSHConfig{
 			Name: lines[0],
-			Port: "",
+			Port: "22", // chore: resolve from global config
 			User: "",
 		}
 
 		for _, line := range lines {
-			line = strings.ReplaceAll(strings.TrimLeft(line, " "), "\t", "")
-			switch {
-			case strings.Contains(line, "Host"):
-				sshConfig.Host = strings.Split(line, " ")[1]
-			case strings.Contains(line, "Port"):
-				sshConfig.Port = strings.Split(line, " ")[1]
-			case strings.Contains(line, "User"):
-				sshConfig.User = strings.Split(line, " ")[1]
-			case strings.Contains(line, "IdentityFile"):
-				sshConfig.Key = strings.Split(line, " ")[1]
+			if len(line) == 0 || line[0] == '#' {
+				continue
 			}
 
+			line = strings.ReplaceAll(strings.TrimLeft(line, " "), "\t", "")
+			lineData := strings.Split(line, " ")
+			value := ""
+			if len(lineData) > 1 {
+				value = lineData[1]
+			}
+
+			switch {
+			case strings.Contains(line, "Host"):
+				sshConfig.Host = value
+			case strings.Contains(line, "Port"):
+				sshConfig.Port = value
+			case strings.Contains(line, "User"):
+				sshConfig.User = value
+			case strings.Contains(line, "IdentityFile"):
+				sshConfig.Key = value
+			case strings.Contains(line, "Include"):
+				result, err := _ParseInclude(value)
+				if err != nil {
+					panic(err)
+				}
+				configs = append(configs, result...)
+			}
 		}
-		configs = append(configs, sshConfig)
+		if len(sshConfig.Host) > 0 {
+			configs = append(configs, sshConfig)
+		}
 	}
 
 	return configs, nil
+}
+
+func _ParseInclude(path string) ([]SSHConfig, error) {
+	var results = make([]SSHConfig, 0)
+
+	var isAbsolute = path[0] == '/' || path[0] == '~'
+	var paths []string
+	var err error
+	if isAbsolute {
+		paths, err = filepath.Glob(path)
+	} else {
+		rootDir := GetSshDir()
+		paths, err = filepath.Glob(fmt.Sprintf("%s/%s", rootDir, path))
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, matchPath := range paths {
+		info, err := os.Stat(matchPath)
+		if err != nil || info.IsDir() {
+			continue
+		}
+
+		fileContent, err := os.ReadFile(matchPath)
+		if err != nil {
+			continue
+		}
+
+		items, err := Parse(string(fileContent))
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, items...)
+	}
+
+	return results, nil
 }
 
 func Print() {
