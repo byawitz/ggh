@@ -2,10 +2,14 @@ package config
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"strings"
+
+	"path/filepath"
+
 	"github.com/byawitz/ggh/internal/theme"
 	"github.com/charmbracelet/bubbles/table"
-	"log"
-	"strings"
 )
 
 type SSHConfig struct {
@@ -24,7 +28,7 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 	configsStrings := strings.Split(strings.ReplaceAll(configFile, "\r\n", "\n"), "Host ")
 	var configs = make([]SSHConfig, 0)
 
-	for _, config := range configsStrings[1:] {
+	for _, config := range configsStrings {
 		lines := strings.Split(config, "\n")
 
 		if strings.Trim(lines[0], " ") == "" {
@@ -42,23 +46,66 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 		}
 
 		for _, line := range lines {
-			line = strings.ReplaceAll(strings.TrimLeft(line, " "), "\t", "")
-			switch {
-			case strings.Contains(line, "Host"):
-				sshConfig.Host = strings.Split(line, " ")[1]
-			case strings.Contains(line, "Port"):
-				sshConfig.Port = strings.Split(line, " ")[1]
-			case strings.Contains(line, "User"):
-				sshConfig.User = strings.Split(line, " ")[1]
-			case strings.Contains(line, "IdentityFile"):
-				sshConfig.Key = strings.Split(line, " ")[1]
+			if len(line) == 0 || line[0] == '#' {
+				continue
 			}
 
+			line = strings.ReplaceAll(strings.TrimLeft(line, " "), "\t", "")
+			lineData := strings.Split(line, " ")
+			value := ""
+			if len(lineData) > 1 {
+				value = lineData[1]
+			}
+			switch {
+			case strings.Contains(line, "Include"):
+				result, err := ParseInclude(value)
+				if err != nil {
+					panic(err)
+				}
+				configs = append(configs, result...)
+			case strings.Contains(line, "Host"):
+				sshConfig.Host = value
+			case strings.Contains(line, "Port"):
+				sshConfig.Port = value
+			case strings.Contains(line, "User"):
+				sshConfig.User = value
+			case strings.Contains(line, "IdentityFile"):
+				sshConfig.Key = value
+			}
 		}
-		configs = append(configs, sshConfig)
+
+		if sshConfig.Host != "" {
+			configs = append(configs, sshConfig)
+		}
 	}
 
 	return configs, nil
+}
+
+func ParseInclude(path string) ([]SSHConfig, error) {
+	var results = make([]SSHConfig, 0)
+
+	if filepath.IsLocal(path) {
+		path = filepath.Join(GetSshDir(), path)
+	}
+
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() {
+		return results, err
+	}
+
+	fileContent, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+
+	items, err := Parse(string(fileContent))
+	if err != nil {
+		return nil, err
+	}
+	results = append(results, items...)
+
+	return results, nil
 }
 
 func Print() {
