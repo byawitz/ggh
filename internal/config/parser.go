@@ -41,7 +41,7 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 
 		sshConfig := SSHConfig{
 			Name: lines[0],
-			Port: "22", // chore: resolve from global config
+			Port: "",
 			User: "",
 		}
 
@@ -56,8 +56,13 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			if len(lineData) > 1 {
 				value = lineData[1]
 			}
-
 			switch {
+			case strings.Contains(line, "Include"):
+				result, err := ParseInclude(value)
+				if err != nil {
+					panic(err)
+				}
+				configs = append(configs, result...)
 			case strings.Contains(line, "Host"):
 				sshConfig.Host = value
 			case strings.Contains(line, "Port"):
@@ -66,15 +71,10 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 				sshConfig.User = value
 			case strings.Contains(line, "IdentityFile"):
 				sshConfig.Key = value
-			case strings.Contains(line, "Include"):
-				result, err := _ParseInclude(value)
-				if err != nil {
-					panic(err)
-				}
-				configs = append(configs, result...)
 			}
 		}
-		if len(sshConfig.Host) > 0 {
+
+		if sshConfig.Host != "" {
 			configs = append(configs, sshConfig)
 		}
 	}
@@ -82,40 +82,28 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 	return configs, nil
 }
 
-func _ParseInclude(path string) ([]SSHConfig, error) {
+func ParseInclude(path string) ([]SSHConfig, error) {
 	var results = make([]SSHConfig, 0)
 
-	var isAbsolute = path[0] == '/' || path[0] == '~'
-	var paths []string
-	var err error
-	if isAbsolute {
-		paths, err = filepath.Glob(path)
-	} else {
-		rootDir := GetSshDir()
-		paths, err = filepath.Glob(fmt.Sprintf("%s/%s", rootDir, path))
+	if filepath.IsLocal(path) {
+		path = filepath.Join(GetSshDir(), path)
 	}
 
+	info, err := os.Stat(path)
+	if err != nil || info.IsDir() {
+		return results, err
+	}
+
+	fileContent, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, matchPath := range paths {
-		info, err := os.Stat(matchPath)
-		if err != nil || info.IsDir() {
-			continue
-		}
-
-		fileContent, err := os.ReadFile(matchPath)
-		if err != nil {
-			continue
-		}
-
-		items, err := Parse(string(fileContent))
-		if err != nil {
-			return nil, err
-		}
-		results = append(results, items...)
+	items, err := Parse(string(fileContent))
+	if err != nil {
+		return nil, err
 	}
+	results = append(results, items...)
 
 	return results, nil
 }
