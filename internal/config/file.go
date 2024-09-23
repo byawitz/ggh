@@ -5,14 +5,19 @@ import (
 	"path/filepath"
 )
 
-func GetSshDir() string {
+func HomeDir() string {
 	userHomeDir, err := os.UserHomeDir()
 
 	if err != nil {
 		return ""
 	}
 
-	return filepath.Join(userHomeDir, ".ssh")
+	return userHomeDir
+}
+
+func GetSshDir() string {
+
+	return filepath.Join(HomeDir(), ".ssh")
 }
 
 func GetConfigFile() string {
