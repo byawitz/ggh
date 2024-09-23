@@ -3,9 +3,12 @@ package interactive
 import (
 	"fmt"
 	"github.com/byawitz/ggh/internal/config"
+	"github.com/byawitz/ggh/internal/history"
 	"github.com/byawitz/ggh/internal/ssh"
 	"github.com/charmbracelet/bubbles/table"
+	"log"
 	"os"
+	"time"
 )
 
 func Config(value string) []string {
@@ -26,5 +29,32 @@ func Config(value string) []string {
 		})
 	}
 	c := Select(rows, SelectConfig)
+	return ssh.GenerateCommandArgs(c)
+}
+
+func History() []string {
+	list, err := history.FetchWithDefaultFile()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if len(list) == 0 {
+		fmt.Println("No history found.")
+		os.Exit(0)
+	}
+
+	var rows []table.Row
+	currentTime := time.Now()
+	for _, historyItem := range list {
+		rows = append(rows, table.Row{
+			historyItem.Connection.Host,
+			historyItem.Connection.Port,
+			historyItem.Connection.User,
+			historyItem.Connection.Key,
+			fmt.Sprintf("%s", history.ReadableTime(currentTime.Sub(historyItem.Date))),
+		})
+	}
+	c := Select(rows, SelectHistory)
 	return ssh.GenerateCommandArgs(c)
 }

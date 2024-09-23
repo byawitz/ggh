@@ -4,12 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/byawitz/ggh/internal/config"
-	"github.com/byawitz/ggh/internal/interactive"
-	"github.com/byawitz/ggh/internal/ssh"
 	"github.com/byawitz/ggh/internal/theme"
 	"github.com/charmbracelet/bubbles/table"
 	"log"
-	"os"
 	"time"
 )
 
@@ -36,32 +33,6 @@ func Fetch(file []byte) ([]SSHHistory, error) {
 
 	return historyList, nil
 }
-func Interactive() []string {
-	list, err := FetchWithDefaultFile()
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if len(list) == 0 {
-		fmt.Println("No history found.")
-		os.Exit(0)
-	}
-
-	var rows []table.Row
-	currentTime := time.Now()
-	for _, history := range list {
-		rows = append(rows, table.Row{
-			history.Connection.Host,
-			history.Connection.Port,
-			history.Connection.User,
-			history.Connection.Key,
-			fmt.Sprintf("%s", readableTime(currentTime.Sub(history.Date))),
-		})
-	}
-	c := interactive.Select(rows, interactive.SelectHistory)
-	return ssh.GenerateCommandArgs(c)
-}
 
 func Print() {
 	list, err := FetchWithDefaultFile()
@@ -82,14 +53,14 @@ func Print() {
 			history.Connection.Port,
 			history.Connection.User,
 			history.Connection.Key,
-			fmt.Sprintf("%s", readableTime(currentTime.Sub(history.Date))),
+			fmt.Sprintf("%s", ReadableTime(currentTime.Sub(history.Date))),
 		})
 	}
 
 	fmt.Println(theme.PrintTable(rows, theme.PrintHistory))
 }
 
-func readableTime(d time.Duration) string {
+func ReadableTime(d time.Duration) string {
 	if d.Seconds() < 60 {
 		return fmt.Sprintf("%d seconds ago", int(d.Seconds()))
 	}
