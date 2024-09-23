@@ -35,10 +35,6 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			continue
 		}
 
-		if search != "" && !strings.Contains(lines[0], search) {
-			continue
-		}
-
 		sshConfig := SSHConfig{
 			Name: lines[0],
 			Port: "",
@@ -58,7 +54,7 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			}
 			switch {
 			case strings.Contains(line, "Include"):
-				result, err := ParseInclude(value)
+				result, err := ParseInclude(search, value)
 				if err != nil {
 					panic(err)
 				}
@@ -74,15 +70,18 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			}
 		}
 
-		if sshConfig.Host != "" {
-			configs = append(configs, sshConfig)
+		if sshConfig.Host == "" || !strings.Contains(sshConfig.Name, search) {
+			continue
 		}
+
+		configs = append(configs, sshConfig)
+
 	}
 
 	return configs, nil
 }
 
-func ParseInclude(path string) ([]SSHConfig, error) {
+func ParseInclude(search string, path string) ([]SSHConfig, error) {
 	var results = make([]SSHConfig, 0)
 
 	if filepath.IsLocal(path) {
@@ -99,7 +98,7 @@ func ParseInclude(path string) ([]SSHConfig, error) {
 		return nil, err
 	}
 
-	items, err := Parse(string(fileContent))
+	items, err := ParseWithSearch(search, string(fileContent))
 	if err != nil {
 		return nil, err
 	}
