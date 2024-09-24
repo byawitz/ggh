@@ -35,10 +35,6 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			continue
 		}
 
-		if search != "" && !strings.Contains(lines[0], search) {
-			continue
-		}
-
 		sshConfig := SSHConfig{
 			Name: lines[0],
 			Port: "",
@@ -58,7 +54,7 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			}
 			switch {
 			case strings.Contains(line, "Include"):
-				result, err := ParseInclude(value)
+				result, err := ParseInclude(search, value)
 				if err != nil {
 					panic(err)
 				}
@@ -74,36 +70,61 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			}
 		}
 
-		if sshConfig.Host != "" {
-			configs = append(configs, sshConfig)
+		if sshConfig.Host == "" || !strings.Contains(sshConfig.Name, search) {
+			continue
 		}
+
+		configs = append(configs, sshConfig)
+
 	}
 
 	return configs, nil
 }
 
-func ParseInclude(path string) ([]SSHConfig, error) {
+func ParseInclude(search string, path string) ([]SSHConfig, error) {
 	var results = make([]SSHConfig, 0)
 
-	if filepath.IsLocal(path) {
+	var isAbsolute = path[0] == '/' || path[0] == '~'
+
+	var paths []string
+	var err error
+
+	if isAbsolute {
+		if path[0] == '~' {
+			path = filepath.Join(HomeDir(), path[2:])
+		}
+	} else {
 		path = filepath.Join(GetSshDir(), path)
 	}
 
-	info, err := os.Stat(path)
-	if err != nil || info.IsDir() {
-		return results, err
-	}
+	paths, err = filepath.Glob(path)
 
-	fileContent, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	items, err := Parse(string(fileContent))
-	if err != nil {
-		return nil, err
+	for _, path := range paths {
+		info, err := os.Stat(path)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if info.IsDir() {
+			continue
+		}
+
+		fileContent, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+
+		items, err := ParseWithSearch(search, string(fileContent))
+		if err != nil {
+			return nil, err
+		}
+		results = append(results, items...)
 	}
-	results = append(results, items...)
 
 	return results, nil
 }
