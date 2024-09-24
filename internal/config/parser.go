@@ -93,10 +93,11 @@ func ParseInclude(search string, path string) ([]SSHConfig, error) {
 		if path[0] == '~' {
 			path = filepath.Join(HomeDir(), path[2:])
 		}
-		paths, err = filepath.Glob(path)
 	} else {
-		paths, err = filepath.Glob(filepath.Join(GetSshDir(), path))
+		path = filepath.Join(GetSshDir(), path)
 	}
+
+	paths, err = filepath.Glob(path)
 
 	if err != nil {
 		return nil, err
