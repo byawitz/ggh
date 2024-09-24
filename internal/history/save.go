@@ -79,7 +79,7 @@ func RemoveByIP(row table.Row) {
 		return
 	}
 
-	ip := row[0]
+	ip := row[1]
 
 	saving := make([]SSHHistory, 0, len(list)-1)
 

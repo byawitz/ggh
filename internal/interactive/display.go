@@ -48,6 +48,7 @@ func History() []string {
 	currentTime := time.Now()
 	for _, historyItem := range list {
 		rows = append(rows, table.Row{
+			historyItem.Connection.Name,
 			historyItem.Connection.Host,
 			historyItem.Connection.Port,
 			historyItem.Connection.User,

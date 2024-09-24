@@ -31,6 +31,20 @@ func Fetch(file []byte) ([]SSHHistory, error) {
 		return nil, err
 	}
 
+	search, err := config.ParseWithSearch("", config.GetConfigFile())
+
+	if err != nil {
+		return historyList, nil
+	}
+
+	for i, history := range historyList {
+		for _, sshConfig := range search {
+			if sshConfig.Host == history.Connection.Host {
+				historyList[i].Connection.Name = sshConfig.Name
+			}
+		}
+	}
+
 	return historyList, nil
 }
 

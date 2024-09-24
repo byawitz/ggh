@@ -57,20 +57,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func setConfig(row table.Row, what Selecting) config.SSHConfig {
-	if what == SelectConfig {
-		return config.SSHConfig{
-			Host: row[1],
-			Port: row[2],
-			User: row[3],
-			Key:  row[4],
-		}
-	}
-
 	return config.SSHConfig{
-		Host: row[0],
-		Port: row[1],
-		User: row[2],
-		Key:  row[3],
+		Host: row[1],
+		Port: row[2],
+		User: row[3],
+		Key:  row[4],
 	}
 }
 
@@ -95,8 +86,9 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 
 	if what == SelectHistory {
 		columns = append(columns, []table.Column{
+			{Title: "Name", Width: 10},
 			{Title: "Host", Width: 15},
-			{Title: "Port", Width: 10},
+			{Title: "Port", Width: 4},
 			{Title: "User", Width: 10},
 			{Title: "Key", Width: 10},
 			{Title: "Last login", Width: 15},
