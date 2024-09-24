@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/byawitz/ggh/internal/config"
+	"github.com/charmbracelet/bubbles/table"
 	"os"
 	"slices"
 	"strings"
@@ -14,7 +15,6 @@ func AddHistoryFromArgs(args []string) {
 	if len(args) == 1 && !strings.Contains(args[0], "@") {
 		localConfig, err := config.GetConfig(args[0])
 		if err != nil || localConfig.Name == "" {
-			fmt.Printf("couldn't fetch %s from config file, error:%v.\n", args[0], err)
 			return
 		}
 
@@ -70,6 +70,33 @@ func AddHistory(c config.SSHConfig) {
 	}
 }
 
+func RemoveByIP(row table.Row) {
+	list, err := Fetch(getFile())
+
+	if err != nil {
+		fmt.Println("error getting ggh file")
+		return
+	}
+
+	ip := row[1]
+
+	saving := make([]SSHHistory, 0, len(list)-1)
+
+	for _, item := range list {
+		if item.Connection.Host == ip {
+			continue
+		}
+
+		saving = append(saving, item)
+	}
+
+	err = saveFile(SSHHistory{}, saving)
+	if err != nil {
+		panic("error saving ggh file")
+	}
+
+}
+
 func saveFile(n SSHHistory, l []SSHHistory) error {
 	file := getFileLocation()
 	fileContent := stringify(n, l)
@@ -89,7 +116,10 @@ func stringify(n SSHHistory, l []SSHHistory) string {
 		}
 	}
 
-	history = append(history, n)
+	if n.Connection.Host != "" {
+		history = append(history, n)
+	}
+
 	history = append(history, l...)
 	content, err := json.Marshal(history)
 

@@ -17,7 +17,7 @@ func Main() {
 	action, value := command.Which()
 	switch action {
 	case command.InteractiveHistory:
-		args = history.Interactive()
+		args = interactive.History()
 	case command.InteractiveConfig:
 		args = interactive.Config("")
 	case command.InteractiveConfigWithSearch:
