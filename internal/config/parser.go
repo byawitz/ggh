@@ -105,8 +105,13 @@ func ParseInclude(search string, path string) ([]SSHConfig, error) {
 
 	for _, path := range paths {
 		info, err := os.Stat(path)
-		if err != nil || info.IsDir() {
-			return results, err
+
+		if err != nil {
+			return nil, err
+		}
+
+		if info.IsDir() {
+			continue
 		}
 
 		fileContent, err := os.ReadFile(path)
