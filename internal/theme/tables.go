@@ -12,18 +12,45 @@ const (
 	PrintHistory
 )
 
+func CalculateColumnWidths(rows []table.Row, columns []table.Column) []table.Column {
+	padding := 2
+	maxWidths := make([]int, len(columns))
+	for i, col := range columns {
+		maxWidths[i] = len(col.Title) + padding
+	}
+
+	for _, row := range rows {
+		for i, cell := range row {
+			if i < len(maxWidths) {
+				width := len(cell) + padding
+				if width > maxWidths[i] {
+					maxWidths[i] = width
+				}
+			}
+		}
+	}
+
+	for i := range columns {
+		columns[i].Width = maxWidths[i]
+	}
+
+	return columns
+}
+
 func PrintTable(rows []table.Row, p Print) string {
 	columns := []table.Column{
-		{Title: "Name", Width: 10},
-		{Title: "Host", Width: 15},
-		{Title: "Port", Width: 10},
-		{Title: "User", Width: 10},
-		{Title: "Key", Width: 10},
+		{Title: "Name"},
+		{Title: "Host"},
+		{Title: "Port"},
+		{Title: "User"},
+		{Title: "Key"},
 	}
 
 	if p == PrintHistory {
-		columns = append(columns, table.Column{Title: "Last login", Width: 15})
+		columns = append(columns, table.Column{Title: "Last login"})
 	}
+
+	columns = CalculateColumnWidths(rows, columns)
 
 	t := table.New(
 		table.WithColumns(columns),

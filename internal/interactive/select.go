@@ -76,24 +76,26 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 	var columns []table.Column
 	if what == SelectConfig {
 		columns = append(columns, []table.Column{
-			{Title: "Name", Width: 15},
-			{Title: "Host", Width: 15},
-			{Title: "Port", Width: 10},
-			{Title: "User", Width: 10},
-			{Title: "Key", Width: 10},
+			{Title: "Name"},
+			{Title: "Host"},
+			{Title: "Port"},
+			{Title: "User"},
+			{Title: "Key"},
 		}...)
 	}
 
 	if what == SelectHistory {
 		columns = append(columns, []table.Column{
-			{Title: "Name", Width: 10},
-			{Title: "Host", Width: 15},
-			{Title: "Port", Width: 4},
-			{Title: "User", Width: 10},
-			{Title: "Key", Width: 10},
-			{Title: "Last login", Width: 15},
+			{Title: "Name"},
+			{Title: "Host"},
+			{Title: "Port"},
+			{Title: "User"},
+			{Title: "Key"},
+			{Title: "Last login"},
 		}...)
 	}
+
+	columns = theme.CalculateColumnWidths(rows, columns)
 
 	t := table.New(
 		table.WithColumns(columns),
@@ -126,6 +128,7 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 
 	return config.SSHConfig{}
 }
+
 func (m model) HelpView() string {
 
 	km := table.DefaultKeyMap()
