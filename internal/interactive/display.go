@@ -2,13 +2,14 @@ package interactive
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
+
 	"github.com/byawitz/ggh/internal/config"
 	"github.com/byawitz/ggh/internal/history"
 	"github.com/byawitz/ggh/internal/ssh"
 	"github.com/charmbracelet/bubbles/table"
-	"log"
-	"os"
-	"time"
 )
 
 func Config(value string) []string {
@@ -30,7 +31,10 @@ func Config(value string) []string {
 	}
 	c := Select(rows, SelectConfig)
 	history.AddHistory(c)
-	return ssh.GenerateCommandArgs(c)
+	if c.Name == "" {
+		return ssh.GenerateCommandArgs(c)
+	}
+	return []string{c.Name}
 }
 
 func History() []string {
@@ -59,5 +63,8 @@ func History() []string {
 	}
 	c := Select(rows, SelectHistory)
 	history.AddHistory(c)
-	return ssh.GenerateCommandArgs(c)
+	if c.Name == "" {
+		return ssh.GenerateCommandArgs(c)
+	}
+	return []string{c.Name}
 }
