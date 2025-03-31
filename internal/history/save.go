@@ -97,6 +97,33 @@ func RemoveByIP(row table.Row) {
 
 }
 
+func RemoveByName(row table.Row) {
+	list, err := Fetch(getFile())
+
+	if err != nil {
+		fmt.Println("error getting ggh file")
+		return
+	}
+
+	cName := row[0]
+
+	saving := make([]SSHHistory, 0, len(list)-1)
+
+	for _, item := range list {
+		if item.Connection.Name == cName {
+			continue
+		}
+
+		saving = append(saving, item)
+	}
+
+	err = saveFile(SSHHistory{}, saving)
+	if err != nil {
+		panic("error saving ggh file")
+	}
+
+}
+
 func saveFile(n SSHHistory, l []SSHHistory) error {
 	file := getFileLocation()
 	fileContent := stringify(n, l)
