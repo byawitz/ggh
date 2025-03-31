@@ -8,6 +8,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	"log"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -53,9 +54,19 @@ func History() []string {
 		}
 	}
 
+	// Sort the unique list by date
+	var sortedList []history.SSHHistory
+	for _, h := range uniqueList {
+		sortedList = append(sortedList, h)
+	}
+	// Sort by date in descending order
+	sort.Slice(sortedList, func(i, j int) bool {
+		return sortedList[i].Date.After(sortedList[j].Date)
+	})
+
 	var rows []table.Row
 	currentTime := time.Now()
-	for _, historyItem := range uniqueList {
+	for _, historyItem := range sortedList {
 		rows = append(rows, table.Row{
 			historyItem.Connection.Name,
 			historyItem.Connection.Host,
