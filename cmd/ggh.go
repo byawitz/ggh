@@ -29,8 +29,7 @@ func Main() {
 		config.Print()
 		return
 	default:
-
+		history.AddHistoryFromArgs(args)
 	}
-	history.AddHistoryFromArgs(args)
 	ssh.Run(args)
 }
