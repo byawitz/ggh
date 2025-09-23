@@ -235,6 +235,8 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 		}...)
 	}
 
+	columns = theme.CalculateColumnWidths(rows, columns)
+
 	t := table.New(
 		table.WithColumns(columns),
 		table.WithRows(rows),
@@ -266,6 +268,7 @@ func Select(rows []table.Row, what Selecting) config.SSHConfig {
 
 	return config.SSHConfig{}
 }
+
 func (m model) HelpView() string {
 
 	km := table.DefaultKeyMap()
