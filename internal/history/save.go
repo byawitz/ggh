@@ -6,7 +6,6 @@ import (
 	"github.com/byawitz/ggh/internal/config"
 	"github.com/charmbracelet/bubbles/table"
 	"os"
-	"slices"
 	"strings"
 	"time"
 )
@@ -109,18 +108,17 @@ func saveFile(n SSHHistory, l []SSHHistory) error {
 func stringify(n SSHHistory, l []SSHHistory) string {
 	history := make([]SSHHistory, 0)
 
-	for i, sshHistory := range l {
-		if sshHistory.Connection.Host == n.Connection.Host &&
-			sshHistory.Connection.Name == n.Connection.Name {
-			l = slices.Delete(l, i, i+1)
-		}
-	}
-
 	if n.Connection.Host != "" {
 		history = append(history, n)
 	}
 
-	history = append(history, l...)
+	for _, sshHistory := range l {
+		sshHistory.Connection.CleanName()
+		if sshHistory.Connection.UniqueKey() != n.Connection.UniqueKey() {
+			history = append(history, sshHistory)
+		}
+	}
+
 	content, err := json.Marshal(history)
 
 	if err != nil {

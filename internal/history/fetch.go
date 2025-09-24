@@ -37,11 +37,21 @@ func Fetch(file []byte) ([]SSHHistory, error) {
 		return historyList, nil
 	}
 
-	for i, history := range historyList {
-		for _, sshConfig := range search {
-			if sshConfig.Host == history.Connection.Host {
-				historyList[i].Connection.Name = sshConfig.Name
+FormatHistoryLoop:
+	for i, historyItem := range historyList {
+		if historyItem.Connection.Name == "" {
+			historyList[i].Connection.Name = config.DirectSSH
+		} else {
+			// Check if the name is in the config file
+			for _, sshConfig := range search {
+				if sshConfig.Name == historyItem.Connection.Name {
+					// Update the config
+					historyList[i].Connection = sshConfig
+					continue FormatHistoryLoop
+				}
 			}
+			// If not, add a missing config prefix
+			historyList[i].Connection.Name = fmt.Sprintf("%s%s", config.MissingConfig, historyItem.Connection.Name)
 		}
 	}
 
