@@ -151,7 +151,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.EnterAltScreen
 		} else {
 			// if not fullscreen, set the height to a minimum of 8 rows
-			m.table.SetHeight(int(math.Min(8, float64(len(m.table.Rows())+1))))
+			m.table.SetHeight(int(math.Min(8, float64(len(m.table.Rows())+2))))
 			return m, tea.ExitAltScreen
 		}
 
@@ -177,7 +177,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, tea.EnterAltScreen
 				} else {
 					// if not fullscreen, set the height to a minimum of 8 rows
-					m.table.SetHeight(int(math.Min(8, float64(len(m.table.Rows())+1))))
+					m.table.SetHeight(int(math.Min(8, float64(len(m.table.Rows())+2))))
 					return m, tea.ExitAltScreen
 				}
 			}
