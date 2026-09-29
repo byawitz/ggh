@@ -56,21 +56,28 @@ func ParseWithSearch(search string, configFile string) ([]SSHConfig, error) {
 			if len(lineData) > 1 {
 				value = lineData[1]
 			}
-			switch {
-			case strings.Contains(line, "Include"):
+			switch strings.ToLower(lineData[0]) {
+			case "include":
 				result, err := ParseInclude(search, value)
 				if err != nil {
 					panic(err)
 				}
 				configs = append(configs, result...)
-			case strings.Contains(line, "Host"):
+			case "host":
 				sshConfig.Host = value
-			case strings.Contains(line, "Port"):
+			case "port":
 				sshConfig.Port = value
-			case strings.Contains(line, "User"):
+			case "user":
 				sshConfig.User = value
-			case strings.Contains(line, "IdentityFile"):
+			case "identityfile":
 				sshConfig.Key = value
+			}
+		}
+
+		if sshConfig.Host == "" {
+			var names []string = strings.Fields(sshConfig.Name)
+			if len(names) > 0 && !strings.ContainsAny(names[0], "*?!") {
+				sshConfig.Host = names[0]
 			}
 		}
 
